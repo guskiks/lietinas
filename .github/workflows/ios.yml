@@ -13,8 +13,8 @@ jobs:
       - name: Lejupielādēt projektu
         uses: actions/checkout@v4
 
-      - name: Instalēt Xcode komandrīku
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+      - name: Pārbaudīt Xcode
+        run: xcodebuild -version
 
       - name: Atrast Xcode projektu
         run: echo "PROJECT_DIR=$(dirname \"$(find . -name Lietinas.xcodeproj -print -quit)\")" >> "$GITHUB_ENV"
