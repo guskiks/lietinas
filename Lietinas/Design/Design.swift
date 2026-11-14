@@ -1,0 +1,7 @@
+import SwiftUI
+
+enum AppColors { static let background = Color(red: 0.976, green: 0.933, blue: 0.953); static let pink = Color(red: 0.945, green: 0.863, blue: 0.906); static let accent = Color(red: 0.851, green: 0.663, blue: 0.757); static let primary = Color(red: 0.718, green: 0.475, blue: 0.608); static let text = Color(red: 0.251, green: 0.204, blue: 0.239); static let secondary = Color(red: 0.608, green: 0.529, blue: 0.576) }
+struct AppCard<Content: View>: View { let content: Content; init(@ViewBuilder content: () -> Content) { self.content = content() }; var body: some View { content.padding(18).background(.white).clipShape(RoundedRectangle(cornerRadius: 20)).shadow(color: .black.opacity(0.05), radius: 10, y: 4) } }
+struct AppButton: View { let title: String; let icon: String; let action: () -> Void; var body: some View { Button(action: action) { Label(title, systemImage: icon).font(.headline).foregroundStyle(.white).frame(maxWidth: .infinity).padding(.vertical, 14).background(AppColors.primary).clipShape(RoundedRectangle(cornerRadius: 16)) } }
+struct EmptyStateView: View { let title: String; let icon: String; var body: some View { ContentUnavailableView(title, systemImage: icon, description: Text("Pievieno savu pirmo lietiņu.")) } }
+extension Date { var latvianLong: String { formatted(.dateTime.weekday(.wide).day().month(.wide).locale(Locale(identifier: "lv_LV"))) }; var dayKey: Date { Calendar.current.startOfDay(for: self) } }
