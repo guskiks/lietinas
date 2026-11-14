@@ -2,15 +2,13 @@ name: Lietiņas iOS IPA
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-15
-
     steps:
       - name: Lejupielādēt projektu
         uses: actions/checkout@v4
@@ -18,7 +16,7 @@ jobs:
       - name: Pārbaudīt Xcode
         run: xcodebuild -version
 
-      - name: Palaist testus
+      - name: Build un unit testi
         run: |
           xcodebuild test \
             -project ./Lietinas.xcodeproj \
@@ -27,7 +25,7 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Izveidot Release build
+      - name: Izveidot unsigned iPhone build
         run: |
           xcodebuild build \
             -project ./Lietinas.xcodeproj \
@@ -37,4 +35,19 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN
+            CODE_SIGN_IDENTITY=""
+
+      - name: Iesaiņot IPA
+        run: |
+          mkdir -p ipa/Payload
+          cp -R build/Build/Products/Release-iphoneos/Lietinas.app ipa/Payload/
+          cd ipa
+          zip -qry ../Lietinas-unsigned.ipa Payload
+
+      - name: Augšupielādēt IPA artefaktu
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lietinas-unsigned-ipa
+          path: Lietinas-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
