@@ -2,13 +2,15 @@ name: Lietiņas iOS IPA
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-15
+
     steps:
       - name: Lejupielādēt projektu
         uses: actions/checkout@v4
@@ -16,41 +18,23 @@ jobs:
       - name: Pārbaudīt Xcode
         run: xcodebuild -version
 
-      - name: Atrast Xcode projektu
-        run: echo "PROJECT_DIR=$(dirname \"$(find . -name Lietinas.xcodeproj -print -quit)\")" >> "$GITHUB_ENV"
-
-      - name: Build un unit testi
+      - name: Palaist testus
         run: |
           xcodebuild test \
-            -project "$PROJECT_DIR/Lietinas.xcodeproj" \
+            -project ./Lietinas.xcodeproj \
             -scheme Lietinas \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Izveidot unsigned iPhone build
+      - name: Izveidot Release build
         run: |
           xcodebuild build \
-            -project "$PROJECT_DIR/Lietinas.xcodeproj" \
+            -project ./Lietinas.xcodeproj \
             -scheme Lietinas \
             -sdk iphoneos \
             -configuration Release \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-
-      - name: Iesaiņot IPA
-        run: |
-          mkdir -p ipa/Payload
-          cp -R build/Build/Products/Release-iphoneos/Lietinas.app ipa/Payload/
-          cd ipa
-          zip -qry ../Lietinas-unsigned.ipa Payload
-
-      - name: Augšupielādēt IPA artefaktu
-        uses: actions/upload-artifact@v4
-        with:
-          name: Lietinas-unsigned-ipa
-          path: Lietinas-unsigned.ipa
-          if-no-files-found: error
-          retention-days: 30
+            CODE_SIGN
