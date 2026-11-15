@@ -1,5 +1,11 @@
 # Lietiņas
 
+## GitHub Pages PWA
+
+Mape `Lietinas-PWA` ir instalējama PWA versija. Workflow `Lietiņas PWA Pages` to automātiski publicē GitHub Pages.
+
+PWA izmanto tikai ierīces pārlūka `localStorage`: dati netiek sūtīti uz serveri, API vai GitHub un nav publiski. Dzēšot pārlūka vietnes datus, lokālie dati var tikt zaudēti.
+
 Native SwiftUI personal planner for iOS 17, in Latvian. Uses SwiftData, UserNotifications and Files folder backups. Bundle identifier: `lv.lietinas.app`.
 
 ## GitHub Actions IPA
