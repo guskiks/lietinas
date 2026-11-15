@@ -43,7 +43,8 @@ struct HabitRow: View {
     var entries: [HabitEntry] = []
     var onEdit: () -> Void = {}
 
-    private var complete: Bool { entries.contains { Calendar.current.isDateInToday($0.date) && $0.isCompleted } }
+    private var todayEntry: HabitEntry? { entries.first { Calendar.current.isDateInToday($0.date) } }
+    private var complete: Bool { todayEntry?.isCompleted == true }
     private var goalProgress: Double { min(1, Double(entries.filter(\.isCompleted).count) / Double(max(1, habit.targetDays))) }
 
     var body: some View {
@@ -61,10 +62,10 @@ struct HabitRow: View {
                     }
                     Spacer()
                     Button {
-                        if complete {
-                            if let entry = entries.first(where: { Calendar.current.isDateInToday($0.date) }) { context.delete(entry) }
+                        if let entry = todayEntry {
+                            entry.isCompleted.toggle()
                         } else {
-                            context.insert(HabitEntry(habitID: habit.id))
+                            context.insert(HabitEntry(habitID: habit.id, isCompleted: true))
                         }
                         try? context.save()
                     } label: {
