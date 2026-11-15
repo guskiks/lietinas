@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import BackgroundTasks
 
 @main
 struct LietinasApp: App {
@@ -9,6 +10,7 @@ struct LietinasApp: App {
     init() {
         do { container = try ModelContainer(for: TaskItem.self, Note.self, Habit.self, HabitEntry.self, Goal.self, CalendarEvent.self) }
         catch { fatalError("Neizdevās sagatavot datu krātuvi: \(error)") }
+        BackgroundTaskService.register()
     }
 
     var body: some Scene {
@@ -26,6 +28,21 @@ final class AppServices {
     let notifications = NotificationService()
     let backups = BackupService()
     private init() {}
-    func applicationStarted(container: ModelContainer) async { await notifications.requestIfNeeded(); await backups.checkDailyBackup(container: container); await notifications.refresh(container: container) }
-    func applicationBecameActive(container: ModelContainer) async { await backups.checkDailyBackup(container: container); await notifications.refresh(container: container) }
+    private(set) var container: ModelContainer?
+    func applicationStarted(container: ModelContainer) async { self.container = container; await notifications.requestIfNeeded(); await backups.checkDailyBackup(container: container); await notifications.refresh(container: container); BackgroundTaskService.schedule() }
+    func applicationBecameActive(container: ModelContainer) async { self.container = container; await backups.checkDailyBackup(container: container); await notifications.refresh(container: container); BackgroundTaskService.schedule() }
+}
+
+@MainActor enum BackgroundTaskService {
+    static let identifier = "lv.lietinas.app.backup"
+    static func register() { BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
+        task.expirationHandler = { task.setTaskCompleted(success: false) }
+        Task { @MainActor in
+            guard let container = AppServices.shared.container else { task.setTaskCompleted(success: false); return }
+            _ = try? AppServices.shared.backups.create(container: container)
+            task.setTaskCompleted(success: true)
+            schedule()
+        }
+    } }
+    static func schedule() { let request = BGProcessingTaskRequest(identifier: identifier); request.earliestBeginDate = Calendar.current.date(byAdding: .hour, value: 6, to: .now); request.requiresNetworkConnectivity = false; request.requiresExternalPower = false; try? BGTaskScheduler.shared.submit(request) }
 }
