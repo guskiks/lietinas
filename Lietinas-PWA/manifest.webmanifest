@@ -1,1 +1,15 @@
-{"name":"Lietiņas","short_name":"Lietiņas","lang":"lv","start_url":"./","display":"standalone","background_color":"#fff7fa","theme_color":"#ef86a5","description":"Privāts personīgais plānotājs","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml"}]}
+{
+  "name": "Lietiņas",
+  "short_name": "Lietiņas",
+  "lang": "lv",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fdf6f9",
+  "theme_color": "#ec6d9b",
+  "description": "Privāts un elegants personīgais plānotājs",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
